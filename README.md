@@ -84,6 +84,19 @@ python run.py --method mas_trained --ckpt ckpt/mmlu_pro-admm-last.pt --task mmlu
     --max_samples 256 --reserve_tail 0 --think --max_new_tokens 8192
 ```
 
+## Repository Layout
+
+```
+run.py              evaluation and trajectory collection (single LLM, Base MAS, trained MAS)
+train.py            distributed / centralized training (Algorithm A1)
+mas/                agents, role prompts (S-MAS, H-MAS), model wrapper, MAS inference
+training/           B-only LoRA, DPO + KL objective, rollouts, ADMM trainer
+consensus/          ADMM steps (Eqs. 7-10), ring all-reduce, gossip
+evaluation/         benchmark loaders, answer scoring, HarmBench judge
+tools/              build / label training data, judge results, merge shards
+scripts/            data download, collection, training, safety evaluation
+```
+
 ## Cite This Work
 
 If you found our code or paper helpful, please cite our work~

@@ -14,7 +14,7 @@ class BaselineMethod:
         self.max_new_tokens = max_new_tokens
         self.temperature = temperature
         self.top_p = top_p
-        self.method_name = "baseline"            # prompts.py asserts on this
+        self.method_name = "baseline"            # mas/prompts.py asserts on this
         self.args = args
         self.task = args.task
 

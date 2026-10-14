@@ -210,7 +210,7 @@ def main() -> None:
     args = build_parser().parse_args()
     if args.text_mas_context_length is not None and args.text_mas_context_length <= 0:
         args.text_mas_context_length = None
-    args.method = "text_mas"                      # prompts.py asserts on this
+    args.method = "text_mas"                      # mas/prompts.py asserts on this
     log = (lambda m: None) if args.quiet else (lambda m: print(m, flush=True))
 
     # ---- training queries: a seed-deterministic shuffle of the task pool

@@ -35,7 +35,7 @@ class TextMASMethod:
         self.temperature = temperature
         self.top_p = top_p
         self.args = args
-        self.method_name = "text_mas"           # prompts.py asserts on this
+        self.method_name = "text_mas"           # mas/prompts.py asserts on this
         self.task = args.task
         self.prompt_mode = args.prompt
         self.build_messages = resolve_prompt_builder(self.prompt_mode)

@@ -68,7 +68,7 @@ class DistTrainedTextMAS:
         self.max_new_tokens_each = max_new_tokens_each
         self.temperature = temperature
         self.top_p = top_p
-        self.method_name = "text_mas"          # prompts.py asserts on this
+        self.method_name = "text_mas"          # mas/prompts.py asserts on this
         self.prompt_mode = args.prompt
         self.build_messages = resolve_prompt_builder(self.prompt_mode)
         self.agents = build_agents(int(getattr(args, "n_agents", 4)))

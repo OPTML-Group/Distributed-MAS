@@ -68,7 +68,7 @@ def prompt_modes() -> list:
 
 
 def resolve_prompt_builder(mode: str):
-    """`--prompt` mode -> builder in prompts.py. Raises on an unknown mode."""
+    """`--prompt` mode -> builder in mas/prompts.py. Raises on an unknown mode."""
     from mas import prompts as P
     builders = {
         "sequential_v2": P.build_agent_messages_sequential_v2_text_mas,
