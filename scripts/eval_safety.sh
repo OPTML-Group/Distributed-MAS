@@ -14,20 +14,18 @@
 #   StrongReject/JBB/OR-Bench  compliance rate (xstest-refusal judge) and harmbench-judge ASR
 #   XSTest over-refusal        refusal rate on the 250 safe prompts (xstest-refusal judge)
 #   MATH-500 utility           accuracy in results/<TAG>-math500.json
+# Every task, MATH-500 included, uses 4096 tokens per agent (MAX_NEW_TOKENS).
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 TAG=$1; shift
 TASKS=${TASKS:-"harmbench strongreject jbb_harmful orbench_toxic xstest math500"}
 ORBENCH_N=${ORBENCH_N:-200}
-GEN="--think --temperature 0.6 --top_p 0.95 --seed 42 --model_name $BACKBONE --reserve_tail 0"
+GEN="--think --temperature 0.6 --top_p 0.95 --seed 42 --max_new_tokens ${MAX_NEW_TOKENS:-4096} --model_name $BACKBONE --reserve_tail 0"
 
 for task in $TASKS; do
   n=-1; [ "$task" = orbench_toxic ] && n=$ORBENCH_N
-  # App. C.4: 4096 tokens per agent for safety, 8192 for capability (MATH-500)
-  tok=${MAX_NEW_TOKENS:-4096}; [ "$task" = math500 ] && tok=${CAPABILITY_TOKENS:-8192}
   out=results/$TAG-$task.json
-  [ -f "$out" ] || $PY run.py "$@" --task $task --max_samples $n --max_new_tokens $tok $GEN \
-      --run_id $TAG-$task --quiet
+  [ -f "$out" ] || $PY run.py "$@" --task $task --max_samples $n $GEN --run_id $TAG-$task --quiet
 done
 
 harm=(); refusal=()
