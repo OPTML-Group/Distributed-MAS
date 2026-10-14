@@ -252,3 +252,4 @@ class DistTrainedTextMAS:
                 "latency_sec": round(time.time() - t0, 3),
             },
         }
+

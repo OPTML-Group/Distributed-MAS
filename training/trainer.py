@@ -549,3 +549,4 @@ class ADMMTrainer:
             "z": [t.detach().cpu() for t in self.admm.z[0]],
             "adapt_idx": list(self.adapt_idx),
         }
+

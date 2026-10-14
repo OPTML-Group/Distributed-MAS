@@ -233,3 +233,4 @@ class ConsensusADMM:
             rec.update(extra)
         self.history.append(rec)
         return rec
+

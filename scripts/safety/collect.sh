@@ -27,3 +27,4 @@ $PY tools/build_fitset.py --src results/collect-$NAME-s*.json \
     --dst ckpt/fitset-$NAME.pt --n_agents $N_AGENTS --adapt_roles all
 # Rollout reward + per-agent message condition (Sec. 4 / App. C.3).
 $PY tools/judge_fitset.py ckpt/fitset-$NAME.pt
+

@@ -11,3 +11,4 @@ sympy==1.13.1
 tqdm==4.67.3
 # only for tools/plot_convergence.py
 matplotlib
+

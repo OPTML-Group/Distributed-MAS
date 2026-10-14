@@ -227,3 +227,4 @@ class LoraFastState:
             "n_participants": n,
             "exact": bool(n > 1 and rel <= tol),
         }
+

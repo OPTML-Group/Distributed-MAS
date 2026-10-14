@@ -103,3 +103,4 @@ def agent_label(agent: Agent, prompt_mode: str) -> str:
 
 __all__ = ["Agent", "build_agents", "ROLE_ALIASES", "canonical_role", "prompt_modes",
            "resolve_prompt_builder", "agent_label", "PROMPT_MODES"]
+

@@ -24,3 +24,4 @@ get https://huggingface.co/datasets/JailbreakBench/JBB-Behaviors/resolve/main/da
 get https://huggingface.co/datasets/bench-llm/or-bench/resolve/main/or-bench-toxic.csv \
     or-bench-toxic.csv 3be45901faae3b4b2b51bf7f8a2784c1650a1cc8c631dbc8b171d5312d4e0057
 echo "safety data ready in $DIR"
+

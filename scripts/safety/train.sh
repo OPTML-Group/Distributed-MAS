@@ -24,3 +24,4 @@ mkdir -p ckpt
 $PY train.py --task safety_train --prompt $(prompt_of $ARCH) --n_agents $N_AGENTS --think \
     --adapt_roles all --reward judge --fit_mode dpo --fitset_cache ckpt/fitset-$NAME.pt \
     --k_outer $T $FLAGS ${EXTRA:-} --model_name $BACKBONE --out ckpt/$NAME-$METHOD${SUFFIX:-}.pt
+

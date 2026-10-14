@@ -237,3 +237,4 @@ def seat_output_ok(gold: str, seat_harmful, seat_output: str) -> bool:
         return not bool(seat_harmful)
     from evaluation import scoring as S
     return not S.detect_refusal_content(seat_output or "")
+

@@ -465,3 +465,4 @@ def drop_unclosed_think(fitsets, log=None, min_keep: int = 16):
         raise SystemExit(f"after filtering, nodes {thin} hold fewer than {min_keep} "
                          f"examples ({[len(fitsets[i]) for i in thin]}); refusing to train.")
     return fitsets
+

@@ -14,3 +14,4 @@ compromised_of() { case $1 in smas) echo solver ;; hmas) echo synthesizer ;; esa
 agent_models_flag() {  # arch setting
   [ "$2" = compromised ] && echo "--agent_models $(compromised_of $1)=$UNALIGNED" || true
 }
+

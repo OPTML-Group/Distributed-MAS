@@ -136,3 +136,4 @@ def spectral_gap(adj: List[List[int]]) -> Optional[float]:
 
 def n_edges(adj: List[List[int]]) -> int:
     return sum(len(a) for a in adj) // 2
+

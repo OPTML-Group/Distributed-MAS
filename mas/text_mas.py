@@ -91,3 +91,4 @@ class TextMASMethod:
             "agents": traces,
             "correct": bool(r >= 1.0),
         }
+

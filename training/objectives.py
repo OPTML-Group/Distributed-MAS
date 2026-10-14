@@ -111,3 +111,4 @@ def group_advantages(rewards: Sequence[float]) -> Tuple[List[float], bool]:
         return [0.0] * len(rewards), True
     adv = (r - r.mean()) / (std + 1e-6)
     return [float(a) for a in adv], False
+

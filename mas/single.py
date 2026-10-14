@@ -48,3 +48,4 @@ class BaselineMethod:
             }],
             "correct": bool(r >= 1.0),
         }
+

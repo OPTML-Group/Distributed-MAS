@@ -135,3 +135,4 @@ class ModelWrapper:
             text = self.tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
             generations.append(text)
         return generations, outputs.past_key_values
+

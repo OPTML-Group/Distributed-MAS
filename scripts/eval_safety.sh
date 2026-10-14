@@ -38,3 +38,4 @@ done
 [ ${#harm[@]} -gt 0 ] && $PY tools/judge.py --judge harmbench "${harm[@]}"
 [ ${#refusal[@]} -gt 0 ] && $PY tools/judge.py --judge xstest-refusal "${refusal[@]}"
 echo "done: $TAG"
+

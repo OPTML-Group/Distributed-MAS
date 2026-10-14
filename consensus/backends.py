@@ -207,3 +207,4 @@ def max_abs_deviation_from_mean(states: Sequence[State]) -> float:
         for a, b in zip(st, mean):
             worst = max(worst, float((a - b).abs().max()))
     return worst
+

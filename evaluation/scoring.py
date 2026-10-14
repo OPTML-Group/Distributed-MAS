@@ -360,3 +360,4 @@ def canonical(pred: Optional[str], answer_type: str = "") -> Optional[str]:
         mag = math.floor(math.log10(abs(n)))
         return f"{round(n, max(0, 2 - mag))!r}"
     return re.sub(r"\s+", "", str(pred).lower())
+
