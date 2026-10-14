@@ -47,7 +47,7 @@ from mas import prompt_modes
 from mas.models import ModelWrapper, auto_device, set_seed
 from training.lora import LoraFastState
 from training.rollouts import (ChainRoller, anchor_key, collect_fitsets,
-                               drop_unclosed_think, sft_to_dpo)
+                               drop_unclosed_think, sft_examples, sft_to_dpo)
 from training.trainer import ADMMTrainer
 
 
@@ -96,7 +96,9 @@ def build_parser() -> argparse.ArgumentParser:
                    default="outcome",
                    help="judge: HarmBench reward stored in --fitset_cache (safety); "
                         "outcome: final-answer correctness (reasoning)")
-    p.add_argument("--fit_mode", choices=["dpo", "sft"], default="dpo")
+    p.add_argument("--fit_mode", choices=["dpo", "sft", "rsft"], default="dpo",
+                   help="role-local objective: dpo (Eq. 8), sft (every collected "
+                        "message), rsft (only messages from successful rollouts)")
     p.add_argument("--anchor_split", default=None,
                    help="draw training queries from this split (e.g. train) instead "
                         "of the evaluation split")
@@ -323,12 +325,15 @@ def main() -> None:
             provenance = "cache"
         fitsets, collect_stats = cached["fitsets"], cached.get("stats", {})
         cached_mode = ck.get("fit_mode", args.fit_mode)
-        if cached_mode != args.fit_mode:
-            if (cached_mode, args.fit_mode) != ("sft", "dpo"):
-                raise SystemExit(f"cannot derive {args.fit_mode!r} examples from a "
-                                 f"{cached_mode!r} cache")
+        if cached_mode == "sft" and args.fit_mode == "dpo":
             fitsets = sft_to_dpo(fitsets)
             log(f"derived DPO pairs from the cached rollouts: {[len(f) for f in fitsets]}")
+        elif cached_mode == "sft" and args.fit_mode in ("sft", "rsft"):
+            fitsets = sft_examples(fitsets, successful_only=(args.fit_mode == "rsft"))
+            log(f"{args.fit_mode} targets from the cached rollouts: {[len(f) for f in fitsets]}")
+        elif cached_mode != args.fit_mode:
+            raise SystemExit(f"cannot derive {args.fit_mode!r} examples from a "
+                             f"{cached_mode!r} cache")
         log(f"reusing fit sets from {args.fitset_cache}: sizes={[len(f) for f in fitsets]}")
         if cached.get("anchor_keys"):
             anchor_keys = list(cached["anchor_keys"])

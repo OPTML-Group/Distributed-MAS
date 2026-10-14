@@ -8,8 +8,8 @@ the LoRA factors.
     dpo_loss       Eq. (8): -log sigma(beta [log pi(m+|c)/pi_ref(m+|c) - log pi(m-|c)/pi_ref(m-|c)])
     kl_forward     KL(pi_ref || pi_theta | c), the forward-KL regulariser added
                    (weighted by beta_KL) to every scored sample
-    advantage_ce   advantage * NLL(m | c); with advantage 1 this is plain SFT on
-                   the message (used by `--fit_mode sft`)
+    advantage_ce   advantage * NLL(m | c); with advantage 1 this is SFT on the
+                   message (`--fit_mode sft` / `rsft`)
 """
 from typing import List, Optional, Sequence, Tuple
 

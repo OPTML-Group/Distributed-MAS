@@ -8,8 +8,10 @@ into per-agent training examples:
           with its message m_i^- from the worst rollout, both scored under the
           preferred rollout's context c_i (Eq. 8). Groups whose rewards are all
           equal carry no preference and are dropped.
-    sft   every rollout's message becomes a target with weight 1 (used with
-          `--fit_prompt` to fit messages collected under a hardened prompt).
+    sft   every rollout's message becomes a target with weight 1 (e.g. with
+          `--fit_prompt`, to fit messages collected under a hardened prompt).
+    rsft  rejection-sampling SFT: only messages from successful rollouts
+          (reward 1) become targets, with weight 1.
 
 The examples of agent i form the local dataset of the training node that holds
 agent i ("seat" partition), so each node's objective f_i is built only from its
@@ -304,6 +306,19 @@ def _examples_from_group(rollouts: List[Rollout], anchor: str, fit_mode: str,
             raise ValueError("fit_mode=sft produced no examples from a non-empty group")
         return out
 
+    if fit_mode == "rsft":
+        for r in rollouts:
+            if r.reward <= 0.5:
+                continue
+            for t in r.turns:
+                node = node_of.get(t.agent_idx)
+                if node is None:
+                    continue
+                out.append(FitExample(t.agent_idx, node, t.prompt, t.output, 1.0, anchor,
+                                      role=t.role, question=t.question, context=t.context,
+                                      reward=float(r.reward), final_text=r.final_text or ""))
+        return out
+
     raise ValueError(f"unknown fit_mode {fit_mode!r}")
 
 
@@ -449,6 +464,25 @@ def sft_to_dpo(fitsets: List[List[FitExample]]) -> List[List[FitExample]]:
                                     final_text=hi.final_text,
                                     reward=float(getattr(hi, "reward", 0.0))))
         out.append(pairs)
+    return out
+
+
+def sft_examples(fitsets: List[List[FitExample]], successful_only: bool = False):
+    """SFT targets (weight 1) from an `sft` fit set built from trajectories.
+
+    successful_only=False  every message (plain SFT / distillation)
+    successful_only=True   only messages whose reward is 1 (rejection-sampling SFT);
+                           with `tools/judge_fitset.py` this is agent i's own r_i
+    """
+    out = []
+    for fs in fitsets:
+        keep = [e for e in fs if not successful_only or float(e.reward) > 0.5]
+        for e in keep:
+            e.advantage = 1.0
+        out.append(keep)
+    if successful_only and not any(out):
+        raise SystemExit("no example has reward 1: label the fit set with "
+                         "tools/judge_fitset.py first")
     return out
 
 

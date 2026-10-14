@@ -72,6 +72,8 @@ The training arms differ only in how agents are coupled; hyper-parameters defaul
 | ADMM-Local | `local` | `--local_only` |
 | ADMM-NoDual | `nodual` | `--no_dual` |
 
+The role-local objective is DPO (Eq. 8) by default. SFT objectives plug into the same ADMM updates: `--fit_mode sft` fits every collected message, and `--fit_mode rsft` fits only messages from successful rollouts (set `FIT_MODE` for `train.sh`). For example, `--prompt sequential_v2s --fit_prompt sequential_v2 --fit_mode sft` distills the safety-aware collection prompt into the deployment prompt.
+
 **Safety (Table 1).** Run the Quick Start for each MAS (`smas`, `hmas`) and setting (`benign`, `compromised`) with the `centralized` and `admm` arms. The Base MAS row uses `--method text_mas` and the Single LLM row `--method baseline`; Table 2 uses the `local` and `nodual` arms.
 
 **Reasoning (Fig. 4).**
