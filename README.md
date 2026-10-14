@@ -63,106 +63,26 @@ Use `smas` / `sequential_v2` / `solver=...` for the sequential MAS, and `benign`
 
 ## Reproducing the Paper
 
-The training arms differ only in how agents are coupled in `train.py`. Default hyper-parameters follow Table A2.
+The training arms differ only in how agents are coupled; hyper-parameters default to Table A2.
 
 | Arm | `train.sh` | `train.py` flags |
 |---|---|---|
-| ADMM | `admm` | `--consensus ring` (or `--consensus gossip --gossip_steps τ`) |
+| ADMM | `admm` | `--consensus ring` (gossip: `--consensus gossip --gossip_steps τ`) |
 | Centralized | `centralized` | `--pooled --consensus coordinator` |
 | ADMM-Local | `local` | `--local_only` |
 | ADMM-NoDual | `nodual` | `--no_dual` |
 
-### Safety (Table 1, Table 2)
+**Safety (Table 1).** Run the Quick Start for each MAS (`smas`, `hmas`) and setting (`benign`, `compromised`) with the `centralized` and `admm` arms. The Base MAS row uses `--method text_mas` and the Single LLM row `--method baseline`; Table 2 uses the `local` and `nodual` arms.
 
-Run once per architecture (`smas`, `hmas`) and setting (`benign`, `compromised`). The example is the compromised H-MAS; for S-MAS use `--prompt sequential_v2` and `solver=...`, and for the benign setting drop `--agent_models`.
-
-```bash
-ARCH=hmas; SETTING=compromised
-SYS="--prompt hierarchical --agent_models synthesizer=mlabonne/Qwen3-8B-abliterated"
-
-# Base MAS (no training)
-bash scripts/eval_safety.sh $ARCH-$SETTING-base --method text_mas $SYS
-
-# training data: 680 queries x 8 rollouts, labeled with the HarmBench reward
-bash scripts/safety/collect.sh $ARCH $SETTING
-
-# Centralized and ADMM (Table 1), ADMM-Local and ADMM-NoDual (Table 2)
-for M in centralized admm local nodual; do
-  bash scripts/safety/train.sh $ARCH $SETTING $M
-done
-
-# evaluation (ADMM-Local has no consensus variable, so each agent uses its own adapter)
-for M in centralized admm nodual; do
-  bash scripts/eval_safety.sh $ARCH-$SETTING-$M --method mas_trained \
-      --ckpt ckpt/$ARCH-$SETTING-n4-$M-last.pt $SYS
-done
-bash scripts/eval_safety.sh $ARCH-$SETTING-local --method mas_trained \
-    --ckpt ckpt/$ARCH-$SETTING-n4-local.pt --deploy local $SYS
-```
-
-The Single-LLM rows use `--method baseline` (add `BACKBONE=mlabonne/Qwen3-8B-abliterated` for the compromised one):
+**Reasoning (Fig. 4).**
 
 ```bash
-bash scripts/eval_safety.sh single --method baseline
-BACKBONE=mlabonne/Qwen3-8B-abliterated bash scripts/eval_safety.sh single-unaligned --method baseline
+python train.py --task mmlu_pro --anchor_offset 256 --think --reward outcome \
+    --anchor_pool 64 --anchor_pass_band 0,1 --recollect_every 1 --k_outer 8 --rho 0.1 \
+    --max_new_tokens 8192 --out ckpt/mmlu_pro-admm.pt
+python run.py --method mas_trained --ckpt ckpt/mmlu_pro-admm-last.pt --task mmlu_pro \
+    --max_samples 256 --reserve_tail 0 --think --max_new_tokens 8192
 ```
-
-Numbers are read from `results/judged/<tag>-<benchmark>.harmbench.json` (ASR), `results/judged/<tag>-xstest.xstest-refusal.json` (XSTest refusal rate on safe prompts) and `results/<tag>-math500.json` (accuracy).
-
-### Untrained systems (Fig. 2, Tables A1, A3, A5)
-
-These only need `run.py`, through `eval_safety.sh` (`TASKS=harmbench` for the appendix tables):
-
-```bash
-# Table A1: another compromised position (any role, or several separated by commas)
-TASKS=harmbench bash scripts/eval_safety.sh smas-verifier --method text_mas --prompt sequential_v2 \
-    --agent_models verifier=mlabonne/Qwen3-8B-abliterated
-
-# Table A3: a different number of agents
-TASKS=harmbench bash scripts/eval_safety.sh hmas-n6 --method text_mas --prompt hierarchical --n_agents 6 \
-    --agent_models synthesizer=mlabonne/Qwen3-8B-abliterated
-
-# Table A5: Qwen3-4B backbone
-BACKBONE=Qwen/Qwen3-4B TASKS=harmbench bash scripts/eval_safety.sh smas4b --method text_mas \
-    --prompt sequential_v2 --agent_models solver=mlabonne/Qwen3-4B-abliterated
-```
-
-### Gossip (Fig. 5)
-
-An eight-agent S-MAS with a compromised Solver, where nodes run τ rounds of gossip on a ring:
-
-```bash
-export N_AGENTS=8
-bash scripts/safety/collect.sh smas compromised
-for TAU in 1 2 4 8 16; do
-  CONSENSUS=gossip GOSSIP_STEPS=$TAU SUFFIX=-tau$TAU bash scripts/safety/train.sh smas compromised admm
-  TASKS=harmbench bash scripts/eval_safety.sh smas8-tau$TAU --method mas_trained \
-      --ckpt ckpt/smas-compromised-n8-admm-tau$TAU.pt --deploy local --n_agents 8 \
-      --prompt sequential_v2 --agent_models solver=mlabonne/Qwen3-8B-abliterated
-done
-```
-
-The final primal residual is in `results/smas-compromised-n8-admm-tau<τ>-train.json`.
-
-### Reasoning (Fig. 4)
-
-Each benchmark is evaluated on the first 256 questions of a fixed shuffle with 8192 tokens per agent; training questions come from the train split (GSM8K) or from the rows after the evaluated ones.
-
-```bash
-TASK=mmlu_pro    # gsm8k: use --anchor_split train instead of --anchor_offset 256
-EVAL="--task $TASK --max_samples 256 --reserve_tail 0 --think --max_new_tokens 8192"
-
-python run.py --method baseline $EVAL --run_id $TASK-single
-python run.py --method text_mas --prompt sequential_v2 $EVAL --run_id $TASK-base
-
-python train.py --task $TASK --anchor_offset 256 --prompt sequential_v2 --think \
-    --reward outcome --anchor_pool 64 --anchors 32 --anchor_pass_band 0,1 \
-    --recollect_every 1 --k_outer 8 --rho 0.1 --max_new_tokens 8192 \
-    --consensus ring --out ckpt/$TASK-admm.pt          # Centralized: --pooled --consensus coordinator
-python run.py --method mas_trained --ckpt ckpt/$TASK-admm-last.pt --prompt sequential_v2 $EVAL --run_id $TASK-admm
-```
-
-GPQA (198 questions) and MATH-500 (500) are small, so lower `--max_samples`, `--anchor_offset`, `--anchors` and `--anchor_pool` accordingly.
 
 ## Cite This Work
 
