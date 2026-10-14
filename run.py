@@ -31,12 +31,11 @@ from typing import Dict, List
 import torch
 from tqdm import tqdm
 
-import data as data_mod
+from evaluation import data as data_mod
 from mas import canonical_role, prompt_modes
 from mas.single import BaselineMethod
 from mas.text_mas import TextMASMethod
-from models import ModelWrapper
-from utils import auto_device, set_seed
+from mas.models import ModelWrapper, auto_device, set_seed
 
 METHODS = ("baseline", "text_mas", "mas_trained")
 

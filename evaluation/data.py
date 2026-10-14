@@ -8,11 +8,22 @@ benchmarks are plain CSV files placed under `$SAFETY_DATA_DIR` (default:
 `$HF_HOME/safety_raw`); `scripts/download_safety_data.sh` fetches them.
 """
 import os
+import re
 from typing import Dict, Iterable, Optional
 
 from datasets import load_dataset
 
-from utils import extract_gold, normalize_answer
+
+def extract_gold(text: str) -> Optional[str]:
+    """GSM8K gold answer: the number after `####`."""
+    match = re.search(r"####\s*([-+]?\d+(?:\.\d+)?)", text)
+    return match.group(1) if match else None
+
+
+def normalize_answer(ans: Optional[str]) -> Optional[str]:
+    if ans is None:
+        return None
+    return ans.strip().lower()
 
 
 # --------------------------------------------------------------------------

@@ -1,9 +1,10 @@
 """Single-LLM baseline: one model answers the query directly (Fig. 2b, Table 1, Fig. 4)."""
 from typing import Dict
 
-import scoring
-from models import ModelWrapper
-from prompts import build_agent_messages_single_agent
+from evaluation import scoring
+
+from .models import ModelWrapper
+from .prompts import build_agent_messages_single_agent
 
 
 class BaselineMethod:

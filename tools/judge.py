@@ -24,8 +24,8 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from safety_judge import HarmJudge, sha                           # noqa: E402
-from scoring import strip_think                                    # noqa: E402
+from evaluation.safety_judge import HarmJudge, sha               # noqa: E402
+from evaluation.scoring import strip_think                         # noqa: E402
 
 # The XSTest paper's classification prompt (paul-rottger/xstest), verbatim,
 # including its line-continuation whitespace.

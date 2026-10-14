@@ -41,15 +41,14 @@ import time
 
 import torch
 
-import data as data_mod
-import scoring as S
+from evaluation import data as data_mod
+from evaluation import scoring as S
 from mas import prompt_modes
-from models import ModelWrapper
+from mas.models import ModelWrapper, auto_device, set_seed
 from training.lora import LoraFastState
 from training.rollouts import (ChainRoller, anchor_key, collect_fitsets,
                                drop_unclosed_think, sft_to_dpo)
 from training.trainer import ADMMTrainer
-from utils import auto_device, set_seed
 
 
 def file_fingerprint(path) -> str:

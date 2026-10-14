@@ -24,9 +24,9 @@ from typing import Dict, List, Optional
 
 import torch
 
-import scoring
 from consensus import max_abs_deviation_from_mean
-from models import ModelWrapper
+from evaluation import scoring
+from mas.models import ModelWrapper
 from training.lora import LoraFastState
 from training.rollouts import anchor_key
 

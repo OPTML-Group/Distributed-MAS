@@ -12,10 +12,10 @@ the system. Roles absent from the map use the shared backbone.
 import argparse
 from typing import Dict, List
 
-import scoring
-from models import ModelWrapper
+from evaluation import scoring
 
 from . import agent_label, build_agents, resolve_prompt_builder
+from .models import ModelWrapper
 
 
 class TextMASMethod:

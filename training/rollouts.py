@@ -31,7 +31,7 @@ from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 import torch
 
-import scoring as S
+from evaluation import scoring as S
 from mas import Agent, agent_label, build_agents, resolve_prompt_builder
 from training import objectives as objt
 from training.lora import LoraFastState

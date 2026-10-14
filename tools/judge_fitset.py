@@ -29,7 +29,7 @@ from collections import defaultdict
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch                                                       # noqa: E402
 
-from safety_judge import HarmJudge, row_kind, seat_output_ok, trajectory_reward  # noqa: E402
+from evaluation.safety_judge import HarmJudge, row_kind, seat_output_ok, trajectory_reward  # noqa: E402
 from training.objectives import group_advantages                  # noqa: E402
 
 

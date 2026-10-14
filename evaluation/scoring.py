@@ -211,6 +211,19 @@ def _symbolically_equal(a: str, b: str) -> bool:
         return False
 
 
+def latex_equal(a: Optional[str], b: Optional[str]) -> bool:
+    """String comparison after whitespace/delimiter normalization."""
+    if a is None or b is None:
+        return False
+
+    def norm(s: str) -> str:
+        s = s.strip().replace(" ", "").replace("\\left", "").replace("\\right", "")
+        s = s.replace("\\!", "").replace("\\,", "").replace("dfrac", "frac").replace("tfrac", "frac")
+        return s.rstrip(".").lower()
+
+    return norm(a) == norm(b)
+
+
 def answers_match(pred: Optional[str], gold, answer_type: str = "") -> bool:
     """Is `pred` the same answer as `gold`?
 
@@ -257,7 +270,6 @@ def answers_match(pred: Optional[str], gold, answer_type: str = "") -> bool:
         return num_close(pn, gn, _looks_integer(gold_s, at), gold_str=gold_s)
 
     # symbolic / string (MATH-500 intervals, tuples, closed forms)
-    from utils import latex_equal
     return latex_equal(pred_s, gold_s) or _symbolically_equal(pred_s, gold_s)
 
 
