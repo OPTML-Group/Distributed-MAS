@@ -1,0 +1,13 @@
+# Versions used for the experiments in the paper (Python 3.10, CUDA 12.1).
+torch==2.5.1
+transformers==4.57.0
+tokenizers==0.22.2
+accelerate==1.13.0
+datasets==4.8.5
+huggingface_hub==0.36.2
+safetensors==0.7.0
+numpy==2.2.6
+sympy==1.13.1
+tqdm==4.67.3
+# only for tools/plot_convergence.py
+matplotlib
