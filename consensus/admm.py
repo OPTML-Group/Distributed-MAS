@@ -9,12 +9,9 @@ lambda = 1 / rho). One ADMM round t -> t+1:
                    solved inexactly with L Adam steps STARTING FROM the anchor
                    a_i (App. B.1), so the proximal term is zero at the first
                    inner step. Local to node i.
-    z-step (9-10)  z_i <- consensus average of b_j = x_j + u_j
+    z-step (9-10)  z_i <- consensus average of the local variables
                    (ring all-reduce, gossip, or an exact coordinator).
-                   The only step that communicates. The implementation
-                   averages x_j, which is identical for the exact backends
-                   (sum_j u_j = 0 is preserved, see below); under gossip the
-                   nodes mix their x_j.
+                   The only step that communicates.
     dual step      u_i <- u_i + x_i - z_i.   Local to node i.
 
 Notes on the implementation:
@@ -25,10 +22,11 @@ Notes on the implementation:
     step and never changes the objective being descended.
   * Non-finite gradients are dropped (and counted) instead of entering the state.
 
-Why averaging x_j suffices for the exact backends: with u_i = 0 at
-initialisation, every dual step adds x_i - mean(x) to u_i, so sum_i u_i stays
-zero and mean(x + u) = mean(x). `residuals()["dual_invariant"]` reports
-||sum_i u_i|| every round.
+The z-step averages x_j. With exact averaging this equals the average of
+b_j = x_j + u_j in Eq. (10): u_i starts at zero and every dual step adds
+x_i - mean(x), so sum_i u_i stays zero (`residuals()["dual_invariant"]`
+reports ||sum_i u_i|| every round). Under gossip each node mixes its
+neighbours' x_j.
 """
 from typing import List, Optional
 
@@ -185,7 +183,7 @@ class ConsensusADMM:
     # -------------------------------------------- z-step, Eqs. (9)-(10)
 
     def z_step(self) -> None:
-        """Consensus averaging. The only step that communicates (see module docstring)."""
+        """Consensus averaging (see module docstring). The only step that communicates."""
         self.z = self.backend.average(self.x)
 
     # ------------------------------------------------------------ dual step

@@ -259,6 +259,18 @@ def main() -> None:
     collect_states = [init_D] * len(adapt_idx) if init_D is not None else None
 
     # ---- pre-screen (reasoning): drop candidates answered correctly twice
+    def probe_fails(item, base, states):
+        """Number of wrong final answers in two sampled rollouts of the MAS."""
+        if item.get("answer_type") == "safety":
+            raise SystemExit("--anchor_pool pre-screening is for reasoning tasks")
+        fails = 0
+        for g in range(2):
+            r = roller.chain(item, seed=base + g * 13, states=states)
+            _pred, ok = S.score(r.final_text or "", item.get("gold", ""),
+                                item.get("answer_type", ""))
+            fails += 0 if ok else 1
+        return fails
+
     prescreen = None
     if args.anchor_pool and args.anchor_pool > args.anchors:
         pre_cache = (args.fitset_cache or f"ckpt/prescreen-{args.task}") + ".prescreen.json"
@@ -267,16 +279,7 @@ def main() -> None:
             k = anchor_keys[a_idx]
             if k in probe:
                 continue
-            if item.get("answer_type") == "safety":
-                raise SystemExit("--anchor_pool pre-screening is for reasoning tasks")
-            base = args.seed * 1000 + 777000 + a_idx * 31
-            fails = 0
-            for g in range(2):
-                r = roller.chain(item, seed=base + g * 13, states=collect_states)
-                _pred, ok = S.score(r.final_text or "", item.get("gold", ""),
-                                    item.get("answer_type", ""))
-                fails += 0 if ok else 1
-            probe[k] = fails
+            probe[k] = probe_fails(item, args.seed * 1000 + 777000 + a_idx * 31, collect_states)
             if (a_idx + 1) % 8 == 0:
                 os.makedirs(os.path.dirname(os.path.abspath(pre_cache)) or ".", exist_ok=True)
                 json.dump(probe, open(pre_cache, "w"))
@@ -474,17 +477,32 @@ def main() -> None:
         n_done = {"n": 0}
 
         def recollect_fn(round_idx):
-            """Algorithm A1, step 3: deploy z_i and roll it out on fresh queries."""
+            """Algorithm A1, step 3: deploy z_i and roll it out on fresh queries.
+
+            Each round takes the next window of unused queries; with --anchor_pool
+            the window is pre-screened under the current adapter (two samples per
+            query, dropping those answered correctly both times), as in App. C.3.
+            """
             n_done["n"] += 1
-            fresh = [it for it in train_pool if anchor_key(it) not in used]
-            if len(fresh) < args.anchors:
-                raise SystemExit(f"only {len(fresh)} unused queries left for re-collection")
-            new_anchors = fresh[: args.anchors]
-            used.update(anchor_key(it) for it in new_anchors)
-            used_keys.extend(anchor_key(it) for it in new_anchors)
             states = [trainer.admm.z[i] for i in range(n_nodes)]
             if n_nodes != len(adapt_idx):           # centralized / anchor partition
                 states = [trainer.admm.z[0]] * len(adapt_idx)
+            fresh = [it for it in train_pool if anchor_key(it) not in used]
+            if len(fresh) < args.anchors:
+                raise SystemExit(f"only {len(fresh)} unused queries left for re-collection")
+            if args.anchor_pool and args.anchor_pool > args.anchors:
+                window = fresh[: args.anchor_pool]
+                used.update(anchor_key(it) for it in window)
+                kept, all_pass = [], []
+                for a_idx, item in enumerate(window):
+                    base = args.seed * 1000 + 777000 + 100000 * n_done["n"] + a_idx * 31
+                    (kept if probe_fails(item, base, states) > 0 else all_pass).append(item)
+                log(f"[prescreen] round {round_idx}: window {len(window)} -> survivors {len(kept)}")
+                new_anchors = (kept + all_pass)[: args.anchors]
+            else:
+                new_anchors = fresh[: args.anchors]
+                used.update(anchor_key(it) for it in new_anchors)
+            used_keys.extend(anchor_key(it) for it in new_anchors)
             fs, st = collect_fitsets(
                 roller, new_anchors, group_size=args.group, credit=args.credit,
                 fit_mode=args.fit_mode, reward=args.reward, pass_band=_pass_band(args),

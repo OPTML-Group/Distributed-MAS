@@ -12,7 +12,7 @@
 <table align="center">
   <tr>
     <td align="center">
-      <img src="./images/teaser.png" alt="teaser" width="600"/>
+      <img src="./images/teaser.png" alt="teaser" width="450"/>
       <br>
       <em style="font-size: 11px;"><strong style="font-size: 11px;">Figure 1:</strong> Schematic overview of centralized and distributed MAS training.</em>
     </td>
