@@ -2,7 +2,7 @@
 
 # Train Locally, Learn Together: Distributed Multi-Agent Training via ADMM
 
-[![preprint](https://img.shields.io/badge/arXiv-XXXX.XXXXX-B31B1B)](https://arxiv.org/abs/XXXX.XXXXX)
+[![preprint](https://img.shields.io/badge/arXiv-2610.24380-B31B1B)](https://arxiv.org/pdf/2610.24380)
 [![Issues](https://img.shields.io/badge/Issues-Welcome!-fbbf24)](../../issues)
 [![python](https://img.shields.io/badge/python-3.10-3776AB)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](./LICENSE)
@@ -19,13 +19,13 @@
   </tr>
 </table>
 
-This is the official code repository for the paper [**Train Locally, Learn Together: Distributed Multi-Agent Training via ADMM**](https://arxiv.org/abs/XXXX.XXXXX).
+This is the official code repository for the paper [**Train Locally, Learn Together: Distributed Multi-Agent Training via ADMM**](https://arxiv.org/pdf/2610.24380).
 
 Each agent of the MAS trains its own LoRA copy on role-local data, and agents only exchange parameters through ADMM consensus (ring all-reduce or gossip). No central trainer is needed.
 
 ## News
 
-- 📢 [Oct 2026] We released the code and posted our paper on [arXiv](https://arxiv.org/abs/XXXX.XXXXX)! 🚀
+- 📢 [Oct 2026] We released the code and posted our paper on [arXiv](https://arxiv.org/pdf/2610.24380)! 🚀
 
 ## Installation
 
@@ -107,7 +107,7 @@ If you found our code or paper helpful, please cite our work~
 @article{chen2026train,
   title={Train Locally, Learn Together: Distributed Multi-Agent Training via ADMM},
   author={Chen, Yiwei and Wang, Changsheng and Lang, Yicheng and Qu, Qing and Hero, Alfred O. and Liu, Sijia},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  journal={arXiv preprint arXiv:2610.24380},
   year={2026}
 }
 ```
